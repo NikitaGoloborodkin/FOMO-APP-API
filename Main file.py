@@ -41,7 +41,8 @@ def verify_keys():
         url = f'https://api.binance.com/api/v3/account?{query_string}&signature={signature}'
         response = requests.get(url, headers=headers)
 
-         if api_key == "test" and api_secret == "test":
-        return jsonify({"success": True})
-    else:
-        return jsonify({"success": False})
+        # Example: Validate the keys (replace this with your logic)
+        if api_key == "test" and api_secret == "test":
+            return jsonify({"success": True, "message": "Keys are valid!"}), 200
+        else:
+            return jsonify({"success": False, "message": "Invalid API keys."}), 400
