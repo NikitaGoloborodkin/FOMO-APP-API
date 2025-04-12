@@ -58,3 +58,6 @@ def verify_keys():
         return jsonify({'success': False, 'message': 'Network error: ' + str(e)}), 500
     except Exception as e:
         return jsonify({'success': False, 'message': 'Unexpected error: ' + str(e)}), 500
+if __name__ == "__main__":
+    handler = VercelHandler(app)
+    handler.run()
