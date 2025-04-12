@@ -17,23 +17,36 @@ def verify_keys():
 
     try:
         timestamp = int(time.time() * 1000)
-        query_string = f'timestamp={timestamp}'
+        
+        # Construct query string with apiKey and timestamp
+        query_string = f'apiKey={api_key}&timestamp={timestamp}'
 
+        # Generate the signature using apiSecret
         signature = hmac.new(
             api_secret.encode('utf-8'),
             query_string.encode('utf-8'),
             hashlib.sha256
         ).hexdigest()
 
+        # Construct the full API URL with the signature
         url = f'https://api.mexc.com/api/v3/account?{query_string}&signature={signature}'
+        
+        # Include apiKey in the headers for authentication
         headers = {
             'X-MEXC-APIKEY': api_key
         }
 
+        # Send the GET request to MEXC
         response = requests.get(url, headers=headers)
 
         if response.status_code == 200:
-            return jsonify({'success': True, 'message': 'MEXC keys are valid.'}), 200
+            if response.json().get('code') == 200:  # Assuming MEXC returns 'code' for success
+                return jsonify({'success': True, 'message': 'MEXC keys are valid.'}), 200
+            else:
+                return jsonify({
+                    'success': False,
+                    'message': f'MEXC key validation failed: {response.json()}'
+                }), 400
         else:
             return jsonify({
                 'success': False,
@@ -41,5 +54,7 @@ def verify_keys():
                 'response': response.json()
             }), response.status_code
 
+    except requests.exceptions.RequestException as e:
+        return jsonify({'success': False, 'message': 'Network error: ' + str(e)}), 500
     except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
+        return jsonify({'success': False, 'message': 'Unexpected error: ' + str(e)}), 500
